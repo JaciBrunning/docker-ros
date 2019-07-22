@@ -31,14 +31,11 @@ Docker Hub: https://hub.docker.com/r/jaci/ros-nvidia
 # It's recommended to set it somewhere isolated. Note that you'll have to manually create the user dir
 # (/some/isolated/home/YOURNAME)
 ROS_NVIDIA_DOCKER_HOME=/some/isolated/home
-
 # Add some docker args. Default is blank
 ROS_NVIDIA_DOCKER_ARGS=--env CUSTOM_ENV=CUSTOM_VAL
-
 # Change the image being used, in case you've made your own derivation of the image in order to add
 # certain packages or other data.
 ROS_NVIDIA_DOCKER_IMAGE=yourname/my-ros-nvidia-image
-
 source /path/to/ros-docker.sh
 ```
 
