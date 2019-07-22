@@ -1,0 +1,7 @@
+ARG baseimg
+FROM $baseimg
+
+ARG package
+RUN apt-get update && apt-get install -y \
+    ros-${ROS_DISTRO}-${package}=${ROS_PKG_VERSION} \
+    && rm -rf /var/lib/apt/lists/*
