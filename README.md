@@ -23,8 +23,9 @@ Docker Hub: https://hub.docker.com/r/jaci/ros-nvidia
   - `desktop-full` (default)
 
 ## Setting up
-1. Put `ros-docker.sh` somewhere on your system, and make it executable
-2. Add `ros-docker.sh` as a source in your `.zshrc` / `.bashrc` / etc file, optionally adding environment variables to customize the installation
+1. Install [nvidia-docker2](https://github.com/NVIDIA/nvidia-docker)
+2. Put `ros-docker.sh` somewhere on your system, and make it executable
+3. Add `ros-docker.sh` as a source in your `.zshrc` / `.bashrc` / etc file, optionally adding environment variables to customize the installation
 ```bash
 # Recommended. By default, this is /home, which means the container has access to your entire homedir.
 # It's recommended to set it somewhere isolated. Note that you'll have to manually create the user dir
