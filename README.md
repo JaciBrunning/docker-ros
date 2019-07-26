@@ -22,6 +22,11 @@ Docker Hub: https://hub.docker.com/r/jaci/ros-nvidia
   - `desktop`
   - `desktop-full` (default)
 
+## Using with VSCode
+By importing `.devcontainer.json` into your vscode workspace, you can use the `Remote - Containers` extension to have your development environment hosted inside of a docker container.
+
+Use `CTRL + SHIFT + P` and select `Open folder in container...`, navigating to the folder with `.devcontainer.json`. This will start up a docker container at the workspace ready for ROS development.
+
 ## Setting up
 1. Install [nvidia-docker2](https://github.com/NVIDIA/nvidia-docker)
 2. Put `ros-docker.sh` somewhere on your system, and make it executable

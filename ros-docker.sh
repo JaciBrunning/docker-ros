@@ -18,6 +18,7 @@ ros-nvidia-launch() {
       --privileged \
       --net=host \
       --user=$(id -u) \
+      --env HOME=/home/$(id -un) \
       $ROS_NVIDIA_DOCKER_ARGS \
       $@
 }
