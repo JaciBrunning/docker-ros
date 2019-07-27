@@ -1,34 +1,38 @@
 #!/bin/bash
 
-ROS_NVIDIA_DOCKER_IMAGE=${ROS_NVIDIA_DOCKER_IMAGE:-jaci/ros-nvidia}
-ROS_NVIDIA_DOCKER_HOME=${ROS_NVIDIA_DOCKER_HOME:-/home}
-ROS_NVIDIA_DOCKER_ARGS=${ROS_NVIDIA_DOCKER_ARGS:-}
+ROS_DOCKER_IMAGE=${ROS_DOCKER_IMAGE:-jaci/ros}
+ROS_DOCKER_HOME=${ROS_DOCKER_HOME:-$HOME}
+ROS_USE_NVIDIA=true
 
-ros-nvidia-launch() {
-  docker run \
-      --env="DISPLAY" \
-      --volume="/etc/group:/etc/group:ro" \
-      --volume="/etc/passwd:/etc/passwd:ro" \
-      --volume="/etc/shadow:/etc/shadow:ro" \
-      --volume="/etc/sudoers.d:/etc/sudoers.d:ro" \
-      --volume="/tmp/.X11-unix:/tmp/.X11-unix:rw" \
-      --volume="$ROS_NVIDIA_DOCKER_HOME:/home" \
-      --volume="$(pwd):/work" \
-      --runtime=nvidia \
-      --privileged \
-      --net=host \
-      --user=$(id -u) \
-      --env HOME=/home/$(id -un) \
-      $ROS_NVIDIA_DOCKER_ARGS \
-      $@
+# TODO: User remap on linux
+
+ROS_DOCKER_ARGS=(
+  --env="DISPLAY"
+  --volume="/tmp/.X11-unix:/tmp/.X11-unix:rw"
+  # --volume="/etc/group:/etc/group:ro"
+  # --volume="/etc/passwd:/etc/passwd:ro"
+  # --volume="/etc/shadow:/etc/shadow:ro"
+  # --volume="/etc/sudoers.d:/etc/sudoers.d:ro"
+  # --user=$(id -u)
+  --env HOME=$HOME
+  --privileged
+  --net=host
+)
+
+ros-launch() {
+  local args=( "${ROS_DOCKER_ARGS[@]}" --volume="$ROS_DOCKER_HOME:$HOME" --volume="$(pwd):/work" )
+  if [ "$ROS_USE_NVIDIA" == "true" ]; then
+    args=( "${args[@]}" --runtime=nvidia )
+  fi
+  docker run ${args[@]} $@
 }
 
-ros-nvidia() {
-  local image=$ROS_NVIDIA_DOCKER_IMAGE:$1
+ros() {
+  local image=$ROS_DOCKER_IMAGE:$1
   if [[ $1 == "i:"* ]]; then
     # Arg provided is an image
     image=${1:2}
     echo "Using Image: ${image}"
   fi
-  ros-nvidia-launch --rm -it $image ${@:2}
+  ros-launch --rm -it $image ${@:2}
 }

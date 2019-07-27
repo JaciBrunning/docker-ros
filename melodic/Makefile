@@ -1,6 +1,6 @@
 DISTRO=melodic
 
-IMAGE=jaci/ros-nvidia:$(DISTRO)
+IMAGE=jaci/ros:$(DISTRO)
 IMAGE_TYPES=ros-base robot perception desktop desktop-full
 
 ALL_BUILDS=$(patsubst %, build-%, $(IMAGE_TYPES))
