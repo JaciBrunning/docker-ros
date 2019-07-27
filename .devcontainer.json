@@ -1,20 +1,12 @@
 {
   // https://code.visualstudio.com/docs/remote/containers
   "name": "ros-dev-container",
-  "image": "jaci/ros-nvidia:melodic",
+  "image": "jaci/ros:melodic",
   "runArgs": [
-    "--env=DISPLAY",
-    "--volume=/etc/group:/etc/group:ro",
-    "--volume=/etc/passwd:/etc/passwd:ro",
-    "--volume=/etc/shadow:/etc/shadow:ro",
-    "--volume=/etc/sudoers.d:/etc/sudoers.d:ro",
-    "--volume=/tmp/.X11-unix:/tmp/.X11-unix:rw",
-    "--volume=${env:ROS_NVIDIA_DOCKER_HOME}:/home",
-    "--runtime=nvidia",
-    "--privileged",
+    "--env", "HOME=${env:HOME}",
+    "--env", "UID=${env:UID}",
+    "--env", "GID=${env:GID}",
     "--net=host",
-    "--user", "${env:UID}",
-    "--env", "HOME=/home/${env:USER}",
     "--volume", "ros-dev-container-vscode-server:/root/.vscode-server"  // Optimization to avoid reinstalling extensions.
   ],
   "extensions": [
