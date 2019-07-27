@@ -3,7 +3,7 @@ set -e
 
 # setup user
 if [[ -n "$UID" ]]; then
-  useradd -m dev
+  useradd -m -d $HOME dev
   echo "dev:dev" | chpasswd
   usermod --shell /bin/bash dev
   usermod -aG sudo dev
