@@ -1,0 +1,21 @@
+version: '3'
+
+services:
+  ros:
+    build:
+      context: .
+      args:
+        FROM: jaci/ros:kinetic
+        USER: ${USER}
+        # In your .bashrc / .zshrc file, put the following:
+        #   export UID=${UID}
+        #   export GID=${GID}
+        UID: ${UID}
+        GID: ${GID}
+    network_mode: host
+    tty: true
+    volumes:
+      - ..:/work
+
+volumes:
+  ros-dev-vscode-server:

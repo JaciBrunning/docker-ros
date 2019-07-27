@@ -2,6 +2,7 @@
   // https://code.visualstudio.com/docs/remote/containers
   "name": "ros-dev-container",
   "dockerComposeFile": "docker-compose.yml",
+  "workspaceFolder": "/work",
   "service": "ros",
   "extensions": [
     "ms-vscode.cpptools",
