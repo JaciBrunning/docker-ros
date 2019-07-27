@@ -1,14 +1,8 @@
 {
   // https://code.visualstudio.com/docs/remote/containers
   "name": "ros-dev-container",
-  "image": "jaci/ros:melodic",
-  "runArgs": [
-    "--env", "HOME=${env:HOME}",
-    "--env", "UID=${env:UID}",
-    "--env", "GID=${env:GID}",
-    "--net=host",
-    "--volume", "ros-dev-container-vscode-server:/root/.vscode-server"  // Optimization to avoid reinstalling extensions.
-  ],
+  "dockerComposeFile": "docker-compose.yml",
+  "service": "ros",
   "extensions": [
     "ms-vscode.cpptools",
     "ms-iot.vscode-ros"

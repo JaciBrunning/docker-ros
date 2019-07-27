@@ -1,0 +1,17 @@
+version: '3'
+
+services:
+  ros:
+    build: .
+    network_mode: host
+    args:
+      FROM: jaci/ros:kinetic
+      USER: ${USER}
+      UID: ${UID}
+      GID: ${GID}
+    volumes:
+      - .:/work
+      - ros-dev-container-vscode-server:~/.vscode-server
+
+volumes:
+  ros-dev-container-vscode-server:
