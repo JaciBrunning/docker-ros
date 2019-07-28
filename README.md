@@ -1,97 +1,77 @@
-ROS NVIDIA Docker Images
+ROS Docker Images
 =====
 
-This project provides docker images for ROS with NVIDIA acceleration, allowing graphical applications like rviz to be run in an isolated environment, or on a system that doesn't match ROS version requirements, 
+This project provides docker images for ROS, along with optional NVIDIA acceleration support, with a friendly startup script and VSCode development support.
 
 Example use cases:
   - Testing a ROS network in a containerized environment
   - Running ROS melodic on Ubuntu 19.04, or on any unsupported platform
 
-Docker Hub: https://hub.docker.com/r/jaci/ros-nvidia
+![](rviz.gif)
 
-## Images:
-- `jaci/ros-nvidia:kinetic-*` - based on Ubuntu 16.04
-  - `ros-core`, `ros-base`
-  - `robot`, `perception`
-  - `desktop`
-  - `desktop-full` (default)
+Docker Hub: https://hub.docker.com/r/jaci/ros  
+GitHub: https://github.com/JacisNonsense/docker-ros
 
-- `jaci/ros-nvidia:melodic-*` - based on Ubuntu 18.04
-  - `ros-core`, `ros-base`
-  - `robot`, `perception`
-  - `desktop`
-  - `desktop-full` (default)
-
-## Using with VSCode
-By importing `.devcontainer.json` into your vscode workspace, you can use the `Remote - Containers` extension to have your development environment hosted inside of a docker container.
-
-Use `CTRL + SHIFT + P` and select `Open folder in container...`, navigating to the folder with `.devcontainer.json`. This will start up a docker container at the workspace ready for ROS development.
-
-## Setting up
-1. Install [nvidia-docker2](https://github.com/NVIDIA/nvidia-docker)
-2. Put `ros-docker.sh` somewhere on your system, and make it executable
-3. Add `ros-docker.sh` as a source in your `.zshrc` / `.bashrc` / etc file, optionally adding environment variables to customize the installation
+## Setting Up
+1. Install the shell utilities
 ```bash
-# Recommended. By default, this is /home, which means the container has access to your entire homedir.
-# It's recommended to set it somewhere isolated. Note that you'll have to manually create the user dir
-# (/some/isolated/home/YOURNAME)
-ROS_NVIDIA_DOCKER_HOME=/some/isolated/home
-# Add some docker args. Default is blank
-ROS_NVIDIA_DOCKER_ARGS=--env CUSTOM_ENV=CUSTOM_VAL
-# Change the image being used, in case you've made your own derivation of the image in order to add
-# certain packages or other data.
-ROS_NVIDIA_DOCKER_IMAGE=yourname/my-ros-nvidia-image
-source /path/to/ros-docker.sh
+cd /tmp
+git clone https://github.com/JacisNonsense/docker-ros
+
+cd docker-ros
+rm -r ~/.docker-ros
+cp -r shell/ ~/.docker-ros
 ```
+
+2. Edit your `.bashrc` / `.zshrc` to include the following lines
+```bash
+export UID=${UID}
+export GID=${GID}
+
+source ~/.docker-ros/ros.sh
+
+# OPTIONAL: Isolate the default HOME for the docker container if you don't want to passthrough your own.
+ROS_DOCKER_HOME=path/to/my/isolated/home
+```
+
+3. Install `nvidia-docker2` if you have a NVIDIA GPU: [nvidia-docker repo](https://github.com/NVIDIA/nvidia-docker)
 
 ## Running
-The `ros-docker.sh` script provides some basic features to help start the docker containers.  
-By default, it will:
-- Setup X11 display and NVIDIA runtime
-- Setup user forwarding (docker container will have your current user and its permissions)
-- Use host networking, so multiple containers may talk to each other through `localhost`
-- Bind container `/home` to the hosts' `ROS_NVIDIA_DOCKER_HOME` (by default, `/home`)
-- Bind container `/work` (working directory) to the current directory
 
-Get a shell
-```bash
-$ ros-nvidia melodic
-user@host:/work$
+```
+$ ros <version>
+```
+Where `<version>` is one of the following:
+  - `kinetic`, `melodic` - Aliases to `kinetic-desktop-full` and `melodic-desktop-full`
+  - `kinetic-ros-core`, `kinetic-ros-base`, `kinetic-robot`, `kinetic-perception`, `kinetic-desktop`, `kinetic-desktop-full`
+  - `melodic-ros-core`, `melodic-ros-base`, `melodic-robot`, `melodic-perception`, `melodic-desktop`, `melodic-desktop-full`
+
+For example:
+```
+$ ros melodic
+user@host:/work$ 
 ```
 
-Provide a command line option
-```bash
-$ ros-nvidia melodic rosrun rviz rviz
+By default, the `ros` script will automatically:
+  - Detect NVIDIA acceleration, and use the `nvidia-docker2` runtime (you must install it first!)
+  - Setup X forwarding
+  - Create a new container image, passing through your local user and `$HOME`
+  - Passthrough your current directory to `/work` via docker bind mount
+  - Make the container interactive (`-it --rm`)
+
+You can specify your own image with `--image image`:
+```
+$ ros --image myname/myimage:version
 ```
 
-Change the image type
-```bash
-$ ros-nvidia melodic-ros-core
-user@host:/work$
+You can launch a program directly from the ros script if you don't require a bash prompt:
+```
+$ ros melodic rviz
 ```
 
-Use your own image by prepending `i:`
-```bash
-$ ros-nvidia i:yourname/myimg:version
-```
+## Using with Visual Studio Code (VSCode)
+Install the `Remote - Container` extension and copy the `.devcontainer` folder into your VSCode workspace.
 
-### I don't want the default docker setup
-You don't need to use `ros-docker.sh` if you don't need it. You can run it with `docker run` like any container.  
+Open the command palette with `CTRL + SHIFT + P` and select `Remote-Containers: Reopen Folder in Container`. VSCode will build a new container and open the editor within the context of the container, providing C++ and Python intellisense with the ros installation.
 
-Example: isolated ros-core with nvidia passthrough  
-`docker run --runtime=nvidia --rm -it jaci/ros-nvidia:melodic roscore`
-
-Note: even though these images provide nvidia acceleration, you don't require `--runtime=nvidia` if you don't need CUDA and/or GUI applications.  
-
-## Building your own images
-If you require your own packages or ROS plugins, it can be advantageous to build your own images so you don't have to reinstall them with every new container.
-
-```Dockerfile
-# Dockerfile
-FROM jaci/ros-nvidia:melodic
-
-# .... Your stuff here ....
-```
-
-You can continue to run `docker build -t yourname/yourimage:melodic .`, pushing to Docker Hub if you so desire.  
-
+By default, the VSCode containers do _not_ forward X11 nor run on the NVIDIA docker runtime. If you require GUI applications and/or NVIDIA acceleration, launch with `ros <version>` in a terminal (as seen in the 'Running' section above).

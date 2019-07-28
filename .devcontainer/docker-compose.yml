@@ -16,6 +16,3 @@ services:
     tty: true
     volumes:
       - ..:/work
-
-volumes:
-  ros-dev-vscode-server:
