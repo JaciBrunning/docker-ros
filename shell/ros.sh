@@ -1,16 +1,58 @@
 #!/bin/bash
 
 ROS_DOCKER_PATH="$( cd "$(dirname "$0")" ; pwd -P )"
+ROS_DOCKER_DEFAULT_IMG=jaci/ros
 
-ROS_DOCKER_IMAGE=${ROS_DOCKER_IMAGE:-jaci/ros}
 ROS_DOCKER_HOME=${ROS_DOCKER_HOME:-$HOME}
 
 ROS_DOCKER_XSOCK=/tmp/.X11-unix
 ROS_DOCKER_XAUTH=/tmp/.docker.xauth
 
+ROS_DOCKER_VERS_FILE=".docker-ros-version"
+
 ros-xauth() {
   touch $1
   xauth nlist $DISPLAY | sed -e 's/^..../ffff/' | xauth -f $1 nmerge -
+}
+
+ros-version() {
+  LOCAL_FILE="./$ROS_DOCKER_VERS_FILE"
+  USER_FILE="$ROS_DOCKER_PATH/$ROS_DOCKER_VERS_FILE"
+
+  if [[ $# -gt 0 ]]; then
+    action="$1"
+    if [[ "$action" == "get" ]]; then
+      if [[ -f $LOCAL_FILE ]]; then
+        cat $LOCAL_FILE
+      elif [[ -f $USER_FILE ]]; then
+        cat $USER_FILE
+      else
+        echo $ROS_DOCKER_DEFAULT_IMG:melodic
+      fi
+    elif [[ "$action" == "set" ]]; then
+      if [[ $# -eq 2 ]]; then
+        echo $ROS_DOCKER_DEFAULT_IMG:$2 > $USER_FILE
+      elif [[ $# -eq 3 ]] && [[ "$2" == "-i" ]]; then
+        echo $3 > $USER_FILE
+      else
+        echo "Usage: ros-version set [-i image] [version]"
+      fi
+    elif [[ "$action" == "set-local" ]]; then
+      if [[ $# -eq 2 ]]; then
+        echo $ROS_DOCKER_DEFAULT_IMG:$2 > $LOCAL_FILE
+      elif [[ $# -eq 3 ]] && [[ "$2" == "-i" ]]; then
+        echo $3 > $LOCAL_FILE
+      else
+        echo "Usage: ros-version set [-i image] [version]"
+      fi
+    fi
+  else
+    echo "Usage: ros-version <action>"
+    echo "  actions:"
+    echo "    get: Get the current active ros version"
+    echo "    set: Set the user default ros version"
+    echo "    set-local: Set the directory default ros version"
+  fi
 }
 
 ros-launch() {
@@ -24,14 +66,14 @@ ros-launch() {
   local nvidia=
   local root=
   local confined=
-  local image=
+  local image="$(ros-version get)"
 
   # Try to detect nvidia support
   if command -v nvidia-smi > /dev/null; then
     nvidia=y
   fi
 
-  while [[ $# -gt 0 && -z $image ]]
+  while [[ $# -gt 0 ]]
   do
     key="$1"
     case $key in 
@@ -72,30 +114,23 @@ ros-launch() {
         shift
         shift
         ;;
-      --image)
+      -i|--image)
         image="$2"
         shift
         shift
         ;;
-      --set-default)
-        image="$2"
-        echo $image > ~/.docker-ros/default
-        echo "Set default image to $image"
+      -v|--version)
+        image="$ROS_DOCKER_DEFAULT_IMG:$2"
         shift
         shift
-        return
         ;;
       *)
-        if [[ "$image" -eq "default" ]]; then
-          image="$(cat ~/.docker-ros/default)"
-          echo "Using default image: $image"
-        else
-          image="$ROS_DOCKER_IMAGE:$1"
-        fi
-        shift
+        break
         ;;
     esac
   done
+
+  echo "Starting ROS Docker Container with image $image"
 
   if [[ -n "$withx" ]]; then
     # X Forwarding Enabled
