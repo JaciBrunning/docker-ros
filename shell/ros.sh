@@ -77,8 +77,21 @@ ros-launch() {
         shift
         shift
         ;;
+      --set-default)
+        image="$2"
+        echo $image > ~/.docker-ros/default
+        echo "Set default image to $image"
+        shift
+        shift
+        return
+        ;;
       *)
-        image="$ROS_DOCKER_IMAGE:$1"
+        if [[ "$image" -eq "default" ]]; then
+          image="$(cat ~/.docker-ros/default)"
+          echo "Using default image: $image"
+        else
+          image="$ROS_DOCKER_IMAGE:$1"
+        fi
         shift
         ;;
     esac
