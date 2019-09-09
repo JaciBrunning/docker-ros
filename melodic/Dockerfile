@@ -1,5 +1,6 @@
 # Based on https://github.com/osrf/docker_images
-FROM nvidia/opengl:1.0-glvnd-runtime-ubuntu18.04
+# FROM nvidia/opengl:1.0-glvnd-runtime-ubuntu18.04
+FROM nvidia/cudagl:10.0-runtime-ubuntu18.04
 
 # setup timezone
 RUN echo 'Etc/UTC' > /etc/timezone && \

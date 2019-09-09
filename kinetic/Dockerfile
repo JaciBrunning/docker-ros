@@ -1,5 +1,6 @@
 # Based on https://github.com/osrf/docker_images
-FROM nvidia/opengl:1.1-glvnd-runtime-ubuntu16.04
+# FROM nvidia/opengl:1.1-glvnd-runtime-ubuntu16.04
+FROM nvidia/cudagl:10.1-runtime-ubuntu16.04
 
 # install packages
 RUN apt-get update && apt-get install -q -y \
